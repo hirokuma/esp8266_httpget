@@ -43,10 +43,10 @@ add 0
 aid 1
 cnt
 
-connected with 自分のSSID, channel 6
+connected with 自分のSSID, channel 自分のチャネル
 dhcp client start...
 evt->event : 0
-[CONN] SSID[自分のSSID] CH[6]
+[CONN] SSID[自分のSSID] CH[自分のチャネル]
 ip:自分のIP,mask:自分のMASK,gw:自分のGW
 evt->event : 3
 [GOT_IP] IP[自分のIP] MASK[自分のMASK] GW[自分のGW]
