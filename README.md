@@ -1,4 +1,4 @@
-# esp8266_helloworld
+# esp8266_gethttp
 
 * ESP8266 + Non-OS SDK 1.5.0_15_11_27
 
