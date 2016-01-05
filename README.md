@@ -29,7 +29,7 @@ http://www7b.biglobe.ne.jp/~hiro99ma/
 </html>
 ```
 
-### 出力例
+### 出力例1 - system_set_os_print(1)
 
 ```
 Ready.
@@ -93,4 +93,51 @@ state: 5 -> 0 (0)
 rm 0
 evt->event : 1
 [DISC] SSID[自分のSSID] REASON[8]
+```
+
+### 出力例2 - system_set_os_print(0)
+
+```
+[[ user_init() ]]
+[[ wifi_eventcb() ]]
+[[ wifi_eventcb() ]]
+[[ dns_done() ]]
+[[ tcp_connected() ]]
+[[ data_sent() ]]
+[[ data_received() ]]
+----------
+HTTP/1.0 200 OK
+Last-Modified: Fri, 08 Mar 2013 15:39:00 GMT
+Accept-Ranges: bytes
+Content-Length: 384
+Content-Type: text/html
+Date: Tue, 05 Jan 2016 04:48:27 GMT
+Server: httpd
+X-Cache: HIT from bvka33276
+X-Cache-Lookup: HIT from bvka33276:80
+Via: 1.1 bvka33276:80 (squid)
+Connection: close
+
+<!DOCTYPE html>
+<html lang="ja">
+        <head>
+                <meta charset="UTF-8" />
+                <title>hiro99ma test site</title>
+        </head>
+
+        <body>
+                <header>
+                        <a href="ikaku01/ikaku.html">ikaku01</a>
+                        <a href="ikaku02/ikaku.html">ikaku02</a>
+                        <a href="ikaku03/ikaku.html">ikaku03</a>
+                        <a href="ikaku04/ikaku.html">ikaku04</a>
+                        <a href="ikaku05/ikaku.html">ikaku05</a>
+                </header>
+        </body>
+
+</html>
+
+----------
+[[ tcp_disconnected() ]]
+[[ wifi_eventcb() ]]
 ```
