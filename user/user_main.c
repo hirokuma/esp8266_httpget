@@ -6,12 +6,12 @@
 #include "user_interface.h"
 #include "user_config.h"
 
+#define USE_UART1_TXD
+
 #define DBG_PRINTF(...)     os_printf(__VA_ARGS__)
-#define DBG_FUNCNAME()      {\
-    uart0_sendStr("[[ ");       \
-    uart0_sendStr(__func__);    \
-    uart0_sendStr("() ]]\n");   \
-}
+#define DBG_FUNCNAME()      do {\
+    DBG_PRINTF("[[ %s() ]]\n", __func__);       \
+} while (0)
 
 #define MY_HOST     "www7b.biglobe.ne.jp"
 #define MY_GET      "/~hiro99ma/index.html"
@@ -42,55 +42,45 @@ static void ICACHE_FLASH_ATTR data_received(void *pArg, char *pData, unsigned sh
 // public
 ////////////////////////////////////////////////////////////////
 
+/******************************************************************************
+ * FunctionName : uart1_tx_one_char
+ * Description  : Internal used function
+ *                Use uart1 interface to transfer one char
+ * Parameters   : uint8 TxChar - character to tx
+ * Returns      : OK
+*******************************************************************************/
+static void ICACHE_FLASH_ATTR uart1_tx_one_char(uint8 TxChar)
+{
+    while (READ_PERI_REG(UART_STATUS(UART1)) & (UART_TXFIFO_CNT << UART_TXFIFO_CNT_S)) {
+    }
+
+    WRITE_PERI_REG(UART_FIFO(UART1) , TxChar);
+}
+
+/******************************************************************************
+ * FunctionName : uart1_write_char
+ * Description  : Internal used function
+ *                Do some special deal while tx char is '\r' or '\n'
+ * Parameters   : char c - character to tx
+ * Returns      : NONE
+*******************************************************************************/
+static void ICACHE_FLASH_ATTR uart1_write_char(char c)
+{
+    if (c == '\n') {
+        uart1_tx_one_char('\r');
+        uart1_tx_one_char('\n');
+    } else if (c == '\r') {
+    } else {
+        uart1_tx_one_char(c);
+    }
+}
+
+
 void user_rf_pre_init(void)
 {
-    uart_init(BIT_RATE_115200, BIT_RATE_115200);
-    os_printf("\nRF pre init.\n");
-
-    struct rst_info *pInfo = system_get_rst_info();
-    switch (pInfo->reason) {
-    case REASON_DEFAULT_RST:
-        os_printf("  REASON_DEFAULT_RST\n");
-        break;
-    case REASON_WDT_RST:
-        os_printf("  REASON_WDT_RST\n");
-        break;
-    case REASON_EXCEPTION_RST:
-        os_printf("  REASON_EXCEPTION_RST\n");
-        break;
-    case REASON_SOFT_WDT_RST:
-        os_printf("  REASON_SOFT_WDT_RST\n");
-        break;
-    case REASON_SOFT_RESTART:
-        os_printf("  REASON_SOFT_RESTART\n");
-        break;
-    case REASON_DEEP_SLEEP_AWAKE:
-        os_printf("  REASON_DEEP_SLEEP_AWAKE\n");
-        break;
-    case REASON_EXT_SYS_RST:
-        os_printf("  REASON_EXT_SYS_RST\n");
-        break;
-    default:
-        os_printf("  unknown reason : %x\n", pInfo->reason);
-        break;
-    }
-    os_delay_us(1 * 1000);     //1msec待って、UARTを全部吐かせる
-
     //system log output : OFF
     //これをすると、自分のos_printfも止まってしまう。
-    //即座に止めるのか、上のログも"REASON_"くらいで終わってしまっていた。
-    system_set_os_print(0);
-    
-    //os_printf()をUART1に割り振る(os_install_putc1)、というのもあるし、
-    //UART0のピンを変更し、RX/TX→MTCK/MTDOにする(system_uart_swap)、というのもある。
-    //しかし、システムが出力するログだけを停止する、というのはないようだ。
-
-    //system_set_os_print()でログを停止させて、
-    //自分で文字列を加工して、uart0_tx_buffer()でUART0に直接送信する方が確実か。
-    //しかし、ここでuart0_tx_buffer()を使うと、REASONのログも正しく出力されなくなった。
-    //出力されなくなったと言うよりは、ゴミになったというべきか。
-    //system_set_os_print()をコメントアウトしても正しく出力されないので、os_printf()との相性が悪いのか。
-    uart0_sendStr("Hello.\n");
+//    system_set_os_print(0);
 }
 
 
@@ -100,9 +90,41 @@ void user_init(void)
     //しかし、system_set_os_print(0)は有効なままだった。
     uart_init(BIT_RATE_115200, BIT_RATE_115200);
 
+#ifdef USE_UART1_TXD
+    //出力をUART1に変更
+    os_install_putc1((void *)uart1_write_char);
+#endif  //USE_UART1_TXD
+
     DBG_PRINTF("\nReady.\n");
 
-    DBG_FUNCNAME();
+    //リセット要因はuser_init()にならないと取得できない
+    struct rst_info *pInfo = system_get_rst_info();
+    switch (pInfo->reason) {
+    case REASON_DEFAULT_RST:
+        DBG_PRINTF("  REASON_DEFAULT_RST\n");
+        break;
+    case REASON_WDT_RST:
+        DBG_PRINTF("  REASON_WDT_RST\n");
+        break;
+    case REASON_EXCEPTION_RST:
+        DBG_PRINTF("  REASON_EXCEPTION_RST\n");
+        break;
+    case REASON_SOFT_WDT_RST:
+        DBG_PRINTF("  REASON_SOFT_WDT_RST\n");
+        break;
+    case REASON_SOFT_RESTART:
+        DBG_PRINTF("  REASON_SOFT_RESTART\n");
+        break;
+    case REASON_DEEP_SLEEP_AWAKE:
+        DBG_PRINTF("  REASON_DEEP_SLEEP_AWAKE\n");
+        break;
+    case REASON_EXT_SYS_RST:
+        DBG_PRINTF("  REASON_EXT_SYS_RST\n");
+        break;
+    default:
+        DBG_PRINTF("  unknown reason : %x\n", pInfo->reason);
+        break;
+    }
 
     //////////////////////////////////////////////////////
     struct station_config stconf;
