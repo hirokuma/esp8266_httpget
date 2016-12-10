@@ -1,11 +1,15 @@
 # esp8266_gethttp
 
-* ESP8266 + Non-OS SDK 1.5.0_15_11_27
+* ESP8266 + esp-open-sdk(ESP8266_NONOS_SDK_V2.0.0_16_08_10)
 
 ## メモ
 ビルドする場合は、フォルダごとSDKの直下に置くかすること。
 そこで ./gen_misc.sh としないとビルドができない(どこかでエラーになる)。
 
+## メモ2
+esp-open-sdkを使うための環境変数を設定しておくこと。
+- XTENSA_INCLUDE : /path/to/&lt;esp-open-sdk&gt;/sdk/include
+- XTENSA_LIB : /path/to/&lt;esp-open-sdk&gt;/sdk/lib
 
 ### behavior
 

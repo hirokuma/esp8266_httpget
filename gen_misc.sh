@@ -7,7 +7,7 @@ find ./ -name "*.c" | xargs touch
 echo "========================================================================"
 echo "make COMPILE=gcc BOOT=new APP=1 SPI_SPEED=40 SPI_MODE=QUI SPI_SIZE_MAP=6"
 echo "========================================================================"
-make COMPILE=gcc BOOT=new APP=1 SPI_SPEED=40 SPI_MODE=QUI SPI_SIZE_MAP=6
+make COMPILE=gcc BOOT=new APP=1 SPI_SPEED=40 SPI_MODE=QUI SPI_SIZE_MAP=6 SDK_PATH=$XTENSA_SDK XTENSA_INCLUDE=$XTENSA_INCLUDE XTENSA_LIB=$XTENSA_LIB
 exit
 
 
